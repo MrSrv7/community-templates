@@ -24,7 +24,6 @@
     workspace = {
       # Runs when a workspace is first created with this `dev.nix` file
       onCreate = {
-        npm-install = "npm ci --no-audit --prefer-offline --no-progress --timing";
         # Open editors for the following files by default, if they exist:
         default.openFiles = [ "README.md" "app.vue" "nuxt.config.ts" ];
       };
@@ -37,6 +36,10 @@
         web = {
           command = ["npm" "run" "dev" "--" "--port" "$PORT" "--host" "0.0.0.0"];
           manager = "web";
+          env = {
+            PORT = "$PORT";
+            HOST = "0.0.0.0";
+          };
         };
       };
     };
