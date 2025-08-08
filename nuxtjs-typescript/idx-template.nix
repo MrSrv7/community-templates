@@ -35,7 +35,58 @@ idx-template \
     
     # Setup IDX configuration
     mkdir -p "$WS_NAME/.idx/"
-    cp -rf ${./dev.nix} "$WS_NAME/.idx/dev.nix"
+    
+    # Create dev.nix configuration
+    cat > "$WS_NAME/.idx/dev.nix" << 'EOF'
+# To learn more about how to use Nix to configure your environment
+# see: https://developers.google.com/idx/guides/customize-idx-env
+{ pkgs, ... }: {
+  # Which nixpkgs channel to use.
+  channel = "stable-24.05"; # or "unstable"
+  # Use https://search.nixos.org/packages to find packages
+  packages = [
+    pkgs.nodejs_20
+    pkgs.nodePackages.pnpm
+    pkgs.yarn
+    pkgs.bun
+  ];
+  # Sets environment variables in the workspace
+  env = {};
+  idx = {
+    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
+    extensions = [
+      "Vue.volar"
+      "dbaeumer.vscode-eslint"
+      "esbenp.prettier-vscode"
+      "bradlc.vscode-tailwindcss"
+      "ms-vscode.vscode-typescript-next"
+    ];
+    workspace = {
+      # Runs when a workspace is first created with this `dev.nix` file
+      onCreate = {
+        # Open editors for the following files by default, if they exist:
+        default.openFiles = [ "README.md" "app.vue" "nuxt.config.ts" ];
+      };
+      # To run something each time the workspace is (re)started, use the `onStart` hook
+    };
+    # Enable previews and customize configuration
+    previews = {
+      enable = true;
+      previews = {
+        web = {
+          command = ["npm" "run" "dev" "--" "--port" "$PORT" "--host" "0.0.0.0"];
+          manager = "web";
+          env = {
+            PORT = "$PORT";
+            HOST = "0.0.0.0";
+          };
+        };
+      };
+    };
+  };
+}
+EOF
+    
     chmod -R +w "$WS_NAME"
     
     # Configure Nuxt for IDX environment
@@ -182,6 +233,52 @@ node_modules
 .env
 .env.*
 !.env.example
+EOF
+    
+    # Create README.md for the project
+    cat > README.md << 'EOF'
+# NuxtJS + TypeScript
+
+A modern NuxtJS application with TypeScript support for full-stack Vue development.
+
+## Features
+
+- ⚡️ **NuxtJS 3** - The intuitive Vue framework for building modern web applications
+- 🟦 **TypeScript** - Full TypeScript support with type safety
+- 🎨 **Vue 3** - Latest Vue.js with Composition API
+- 🛠️ **Vite** - Fast development and build tooling
+- 📱 **SSR/SSG** - Server-Side Rendering and Static Site Generation
+- 🔧 **Auto-imports** - Automatic component and composable imports
+- 🎯 **File-based routing** - Automatic routing based on file structure
+- 🔥 **Hot reload** - Fast development with instant updates
+
+## Getting Started
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+## Build
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+## Learn More
+
+- [NuxtJS Documentation](https://nuxt.com/)
+- [Vue 3 Documentation](https://vuejs.org/)
+- [TypeScript Documentation](https://www.typescriptlang.org/)
 EOF
     
     # Create additional directories that are commonly used
